@@ -18,22 +18,22 @@ public class FluxToJson {
 
 	public static void main(String[] args) {
 
-		Package aPackage = getNodeFromRecursive(new File("D:\\pack1"));
+		Package aPackage = getPackFromRecursive(new File("D:\\pack1"));
 		Flux.just(aPackage)
 				.expand(pack -> Flux.fromIterable(pack.getChildren()))
 				.subscribe(FluxToJson::toJSON);
 	}
 
-	private static Package getNodeFromRecursive(File file) {
-		Package node = new Package(file);
+	private static Package getPackFromRecursive(File file) {
+		Package pack = new Package(file);
 		if (file.isDirectory()) {
-			node = new Package(file,
+			pack = new Package(file,
 					Arrays.stream(file.listFiles())
-							.map(eachFile -> getNodeFromRecursive(eachFile))
+							.map(eachFile -> getPackFromRecursive(eachFile))
 							.collect(Collectors.toList())
 							.toArray(new Package[]{}));
 		}
-		return node;
+		return pack;
 	}
 
 	private static void toJSON(Package pack) {
@@ -54,10 +54,10 @@ final class Package {
 	@JsonProperty("children")
 	private List<Package> children;
 
-	Package(File name, Package... nodes) {
+	Package(File name, Package... packages) {
 		this.name = name;
 		this.children = new ArrayList<>();
-		children.addAll(Arrays.asList(nodes));
+		children.addAll(Arrays.asList(packages));
 	}
 
 	public List<Package> getChildren() {
